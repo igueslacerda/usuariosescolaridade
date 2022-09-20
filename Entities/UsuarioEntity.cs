@@ -7,5 +7,5 @@ public class UsuarioEntity
     public string? Email { get; set; }
     public DateTime? DataNascimento { get; set; }
     public int EscolaridadeId { get; set; }
-    public EscolaridadeEntity? Escolaridade { get; set; }
+    public EscolaridadeEntity Escolaridade { get; set; }
 }

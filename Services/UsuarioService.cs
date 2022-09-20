@@ -26,16 +26,19 @@ public class UsuarioService : IUsuarioService
 
     public IEnumerable<UsuarioModel> ObterTodos()
     {
-        return _context.Usuarios.Select(u => new UsuarioModel(u.Id, u.Nome, u.Email, _mapper.Map<EscolaridadeModel>(u.Escolaridade)));
+        var todosUsuarios = _mapper.Map<List<UsuarioModel>>(_context.Usuarios);
+        return todosUsuarios;
     }
 
     public UsuarioModel ObterPorId(int id)
     {
-        var usuario = _context.Usuarios.Where(u => u.Id == id)?.
-                      Select(u => new UsuarioModel(u.Id, u.Nome, u.Email, _mapper.Map<EscolaridadeModel>(u.Escolaridade)))?.
-                      FirstOrDefault();
+        var usuarioEntity = _context.Usuarios.Where(u => u.Id == id)?.FirstOrDefault();
+        var usuario = _mapper.Map<UsuarioModel>(usuarioEntity);        
 
         if (usuario == null) throw new KeyNotFoundException("Usuário não encontrado");
+
+        var escEntity = usuarioEntity.Escolaridade;
+        usuario.Escolaridade = _mapper.Map<EscolaridadeModel>(escEntity);
 
         return usuario;              
     }
