@@ -3,6 +3,7 @@ namespace UsuariosEscolaridade.Helpers;
 using AutoMapper;
 using UsuariosEscolaridade.Entities;
 using UsuariosEscolaridade.Models;
+using UsuariosEscolaridade.Services.Requests;
 
 public class AutoMapperProfile : Profile
 {
@@ -12,6 +13,11 @@ public class AutoMapperProfile : Profile
             .ForAllMembers(p => p.Condition((src, dest, prop) => IgnoreNullOnMap(prop)));
 
         CreateMap<UsuarioEntity, UsuarioModel>()
+            .ForAllMembers(p => p.Condition((src, dest, prop) => IgnoreNullOnMap(prop)));
+
+        CreateMap<UsuarioNovoRequest, UsuarioEntity>();
+
+        CreateMap<UsuarioAlterarRequest, UsuarioEntity>()
             .ForAllMembers(p => p.Condition((src, dest, prop) => IgnoreNullOnMap(prop)));
     }
 

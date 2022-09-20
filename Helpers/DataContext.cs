@@ -2,7 +2,6 @@ namespace UsuariosEscolaridade.Helpers;
 
 using Microsoft.EntityFrameworkCore;
 using UsuariosEscolaridade.Entities;
-using UsuariosEscolaridade.Entities.Configurations;
 
 public class DataContext : DbContext
 {
@@ -20,13 +19,5 @@ public class DataContext : DbContext
     {
         // conecta em sql server utilizando connection string do app settings
         options.UseSqlServer(Configuration.GetConnectionString("IguesSomeeSQL"));
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfiguration(new EscolaridadeConfiguration());
-        modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
-
-        base.OnModelCreating(modelBuilder);
     }
 }

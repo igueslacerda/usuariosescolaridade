@@ -30,9 +30,16 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Criar(NovoUsuarioRequest usuario)
+    public IActionResult Criar(UsuarioNovoRequest usuario)
     {
         _usuarioService.Criar(usuario);
         return Ok(new { mensagem = "Usuário criado" });
+    }
+
+    [HttpPut]
+    public IActionResult Atualizar(UsuarioAlterarRequest usuarioAlteracao)
+    {
+        var usuario = _usuarioService.Atualizar(usuarioAlteracao);
+        return Ok(new { mensagem = $"Usuário {usuario.Nome} {usuario.Sobrenome} atualizado com sucesso." });
     }
 }

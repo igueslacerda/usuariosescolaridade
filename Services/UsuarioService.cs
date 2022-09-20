@@ -10,7 +10,8 @@ public interface IUsuarioService
 {
     IEnumerable<UsuarioModel> ObterTodos();
     UsuarioModel ObterPorId(int id);
-    void Criar(NovoUsuarioRequest usuario);
+    void Criar(UsuarioNovoRequest usuario);
+    UsuarioModel Atualizar(UsuarioAlterarRequest usuarioAlteracao);
 }
 
 public class UsuarioService : IUsuarioService
@@ -26,24 +27,30 @@ public class UsuarioService : IUsuarioService
 
     public IEnumerable<UsuarioModel> ObterTodos()
     {
-        var todosUsuarios = _mapper.Map<List<UsuarioModel>>(_context.Usuarios);
-        return todosUsuarios;
+        return _context.Usuarios.
+                Select(u => new UsuarioModel(
+                    u.Id,
+                    u.Nome,
+                    u.Sobrenome,
+                    u.Email,
+                    u.DataNascimento,
+                    _mapper.Map<EscolaridadeModel>(u.Escolaridade)
+                ));
     }
 
     public UsuarioModel ObterPorId(int id)
     {
-        var usuarioEntity = _context.Usuarios.Where(u => u.Id == id)?.FirstOrDefault();
-        var usuario = _mapper.Map<UsuarioModel>(usuarioEntity);        
+        var usuarioSelect = _context.Usuarios.Where(u => u.Id == id)?.
+                            Select(u => new { u, u.Escolaridade })?.FirstOrDefault();
 
-        if (usuario == null) throw new KeyNotFoundException("Usuário não encontrado");
+        if (usuarioSelect == null) throw new KeyNotFoundException("Usuário não encontrado");
 
-        var escEntity = usuarioEntity.Escolaridade;
-        usuario.Escolaridade = _mapper.Map<EscolaridadeModel>(escEntity);
-
+        var usuario = _mapper.Map<UsuarioModel>(usuarioSelect.u);
+        usuario.Escolaridade = _mapper.Map<EscolaridadeModel>(usuarioSelect.Escolaridade);
         return usuario;              
     }
 
-    public void Criar(NovoUsuarioRequest usuario)
+    public void Criar(UsuarioNovoRequest usuario)
     {
         //Validações
         if (usuario.Email != usuario.EmailConfirmacao)
@@ -56,14 +63,37 @@ public class UsuarioService : IUsuarioService
             throw new KeyNotFoundException("A escolaridade selecionada não existe.");
 
         //Salvar o registro em banco
-        var novoUsuario = new UsuarioEntity
-        {
-            Nome = usuario.Nome,
-            Email = usuario.Email,
-            EscolaridadeId = usuario.EscolaridadeId
-        };
+        var novoUsuario = _mapper.Map<UsuarioEntity>(usuario);
 
         _context.Usuarios.Add(novoUsuario);
         _context.SaveChanges();
+    }
+
+    public UsuarioModel Atualizar(UsuarioAlterarRequest usuarioAlteracao)
+    {
+        //Validações
+        if (usuarioAlteracao.Email != null)
+        {
+            if (usuarioAlteracao.Email != usuarioAlteracao.EmailConfirmacao)
+                throw new AppException("O email de confirmação não confere.");
+
+            if (_context.Usuarios.Any(u => u.Id != usuarioAlteracao.Id && u.Email == usuarioAlteracao.Email))
+                throw new AppException($"Já existe um usuário com o email {usuarioAlteracao.Email}.");
+        }
+
+        if (usuarioAlteracao.EscolaridadeId != null && !_context.Escolaridade.Any(ec => ec.Id == usuarioAlteracao.EscolaridadeId))
+            throw new KeyNotFoundException("A escolaridade selecionada não existe.");
+
+        var usuario = _context.Usuarios.Find(usuarioAlteracao.Id);
+
+        if (usuario == null)
+            throw new KeyNotFoundException("Usuário não encontrado.");
+
+        //Aplicando alterações
+        usuario = _mapper.Map(usuarioAlteracao, usuario);
+        _context.Usuarios.Update(usuario);
+        _context.SaveChanges();
+
+        return ObterPorId(usuario.Id);
     }
 }
