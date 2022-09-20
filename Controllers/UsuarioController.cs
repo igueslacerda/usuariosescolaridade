@@ -42,4 +42,11 @@ public class UsuarioController : ControllerBase
         var usuario = _usuarioService.Atualizar(usuarioAlteracao);
         return Ok(new { mensagem = $"Usuário {usuario.Nome} {usuario.Sobrenome} atualizado com sucesso." });
     }
+
+    [HttpDelete("{id}")]
+    public IActionResult Excluir(int id)
+    {
+        var usuario = _usuarioService.Excluir(id);
+        return Ok(new { mensagem = $"Usuário {usuario.Nome} {usuario.Sobrenome} excluido com sucesso." });
+    }
 }

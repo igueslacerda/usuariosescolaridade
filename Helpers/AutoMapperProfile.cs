@@ -15,9 +15,11 @@ public class AutoMapperProfile : Profile
         CreateMap<UsuarioEntity, UsuarioModel>()
             .ForAllMembers(p => p.Condition((src, dest, prop) => IgnoreNullOnMap(prop)));
 
-        CreateMap<UsuarioNovoRequest, UsuarioEntity>();
+        CreateMap<UsuarioNovoRequest, UsuarioEntity>()
+            .ForMember(dest => dest.Escolaridade, act => act.Ignore());
 
         CreateMap<UsuarioAlterarRequest, UsuarioEntity>()
+            .ForMember(dest => dest.Escolaridade, act => act.Ignore())
             .ForAllMembers(p => p.Condition((src, dest, prop) => IgnoreNullOnMap(prop)));
     }
 

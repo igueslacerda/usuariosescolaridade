@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 public class UsuarioEntity
 {
-    [Key]
+    [Key]   //A chave da tabela Usuarios é um identity
     public int Id { get; set; }
     public string? Nome { get; set; }
     public string? Sobrenome { get; set; }

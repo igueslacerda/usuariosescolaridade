@@ -14,16 +14,16 @@ public class UsuarioNovoRequest
     [EmailAddress]
     public string Email { get; set; }
 
-    [Required]
     [EmailAddress]
     [Compare("Email")]
-    public string EmailConfirmacao { get; set; }
+    public string? EmailConfirmacao { get; set; }
 
     [Required]
     public DateTime? DataNascimento { get; set; }
 
-    [Required]
-    public int EscolaridadeId { get; set; }
+    public int? EscolaridadeId { get; set; }
+
+    public string? Escolaridade { get; set; }
 }
 
 public class UsuarioAlterarRequest
@@ -45,4 +45,6 @@ public class UsuarioAlterarRequest
     public DateTime? DataNascimento { get; set; }
 
     public int? EscolaridadeId { get; set; }
+
+    public string? Escolaridade { get; set; }
 }

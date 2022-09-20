@@ -12,6 +12,7 @@ public interface IUsuarioService
     UsuarioModel ObterPorId(int id);
     void Criar(UsuarioNovoRequest usuario);
     UsuarioModel Atualizar(UsuarioAlterarRequest usuarioAlteracao);
+    UsuarioModel Excluir(int id);
 }
 
 public class UsuarioService : IUsuarioService
@@ -59,8 +60,19 @@ public class UsuarioService : IUsuarioService
         if (_context.Usuarios.Any(u => u.Email == usuario.Email))
             throw new AppException($"Já existe um usuário com o email {usuario.Email}.");
 
-        if (!_context.Escolaridade.Any(ec => ec.Id == usuario.EscolaridadeId))
+        if (usuario.DataNascimento > DateTime.Now)
+            throw new AppException("A data de nascimento não pode ser maior que hoje.");
+
+        EscolaridadeEntity escolaridade;
+        if (!string.IsNullOrEmpty(usuario.Escolaridade))
+            escolaridade = _context.Escolaridade.FirstOrDefault(ec => ec.Descricao == usuario.Escolaridade);        
+        else if (usuario.EscolaridadeId == null)
+            throw new AppException("A escolaridade deve ser informada.");
+        else
+            escolaridade = _context.Escolaridade.Find(usuario.EscolaridadeId.Value);
+        if (escolaridade == null)
             throw new KeyNotFoundException("A escolaridade selecionada não existe.");
+        usuario.EscolaridadeId = escolaridade.Id;
 
         //Salvar o registro em banco
         var novoUsuario = _mapper.Map<UsuarioEntity>(usuario);
@@ -81,8 +93,20 @@ public class UsuarioService : IUsuarioService
                 throw new AppException($"Já existe um usuário com o email {usuarioAlteracao.Email}.");
         }
 
-        if (usuarioAlteracao.EscolaridadeId != null && !_context.Escolaridade.Any(ec => ec.Id == usuarioAlteracao.EscolaridadeId))
-            throw new KeyNotFoundException("A escolaridade selecionada não existe.");
+        if (usuarioAlteracao.DataNascimento != null && usuarioAlteracao.DataNascimento > DateTime.Now)
+            throw new AppException("A data de nascimento não pode ser maior que hoje.");
+
+        if (!string.IsNullOrEmpty(usuarioAlteracao.Escolaridade) || usuarioAlteracao.EscolaridadeId != null)
+        {
+            EscolaridadeEntity escolaridade;
+            if (!string.IsNullOrEmpty(usuarioAlteracao.Escolaridade))
+                escolaridade = _context.Escolaridade.FirstOrDefault(ec => ec.Descricao == usuarioAlteracao.Escolaridade);        
+            else
+                escolaridade = _context.Escolaridade.Find(usuarioAlteracao.EscolaridadeId.Value);
+            if (escolaridade == null)
+                throw new KeyNotFoundException("A escolaridade selecionada não existe.");
+            usuarioAlteracao.EscolaridadeId = escolaridade.Id;
+        }
 
         var usuario = _context.Usuarios.Find(usuarioAlteracao.Id);
 
@@ -95,5 +119,18 @@ public class UsuarioService : IUsuarioService
         _context.SaveChanges();
 
         return ObterPorId(usuario.Id);
+    }
+
+    public UsuarioModel Excluir(int id)
+    {
+        var usuario = _context.Usuarios.Find(id);
+
+        if (usuario == null)
+            throw new KeyNotFoundException("Usuário não encontrado.");
+
+        _context.Usuarios.Remove(usuario);
+        _context.SaveChanges();
+
+        return _mapper.Map<UsuarioModel>(usuario);
     }
 }
