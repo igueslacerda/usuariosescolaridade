@@ -13,6 +13,7 @@ public class NovoUsuarioRequest
 
     [Required]
     [EmailAddress]
+    [Compare("Email")]
     public string EmailConfirmacao { get; set; }
 
     [Required]

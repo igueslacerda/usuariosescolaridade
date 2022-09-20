@@ -18,7 +18,7 @@ public class DataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        // connect to sql server with connection string from app settings
+        // conecta em sql server utilizando connection string do app settings
         options.UseSqlServer(Configuration.GetConnectionString("IguesSomeeSQL"));
     }
 

@@ -1,5 +1,6 @@
 namespace UsuariosEscolaridade.Services;
 
+using AutoMapper;
 using Models;
 using UsuariosEscolaridade.Entities;
 using UsuariosEscolaridade.Helpers;
@@ -15,21 +16,23 @@ public interface IUsuarioService
 public class UsuarioService : IUsuarioService
 {
     private DataContext _context;
+    private readonly IMapper _mapper;
 
-    public UsuarioService(DataContext context)
+    public UsuarioService(DataContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public IEnumerable<UsuarioModel> ObterTodos()
     {
-        return _context.Usuarios.Select(u => new UsuarioModel(u.Id, u.Nome, new EscolaridadeModel(u.Escolaridade)));
+        return _context.Usuarios.Select(u => new UsuarioModel(u.Id, u.Nome, u.Email, _mapper.Map<EscolaridadeModel>(u.Escolaridade)));
     }
 
     public UsuarioModel ObterPorId(int id)
     {
         var usuario = _context.Usuarios.Where(u => u.Id == id)?.
-                      Select(u => new UsuarioModel(u.Id, u.Nome, new EscolaridadeModel(u.Escolaridade)))?.
+                      Select(u => new UsuarioModel(u.Id, u.Nome, u.Email, _mapper.Map<EscolaridadeModel>(u.Escolaridade)))?.
                       FirstOrDefault();
 
         if (usuario == null) throw new KeyNotFoundException("Usuário não encontrado");
